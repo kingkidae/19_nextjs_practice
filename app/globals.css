@@ -123,6 +123,56 @@ body::before {
 }
 }
 
+/* 스플릿 플랩: 글자 한 칸 = 위아래 반쪽 판 + 가운데 경첩선 */
+.flap {
+  /* 경첩 위치: Black Han Sans 는 글자가 줄 위쪽에 붙어 있어 글자 중심이 줄 높이의 42% 지점이다 */
+  --split: 42%;
+  position: relative;
+  display: inline-block;
+  perspective: 1.6em;
+}
+.flap-sizer {
+  visibility: hidden; /* 칸 폭을 최종 글자에 고정한다 */
+}
+.flap-layer {
+  position: absolute;
+  inset: 0;
+  text-align: center;
+  backface-visibility: hidden;
+  transform-origin: 50% var(--split);
+}
+.flap-top {
+  clip-path: inset(-0.2em -0.2em calc(100% - var(--split)) -0.2em);
+}
+.flap-bottom {
+  clip-path: inset(var(--split) -0.2em -0.2em -0.2em);
+}
+.flap-fold-top {
+  animation: flap-fold-top var(--d) ease-in forwards;
+}
+.flap-fold-bottom {
+  animation: flap-fold-bottom var(--d) ease-out forwards;
+}
+.flap::after {
+  content: "";
+  position: absolute;
+  left: -0.02em;
+  right: -0.02em;
+  top: var(--split);
+  height: 0.025em;
+  transform: translateY(-50%);
+  background: var(--linen);
+  z-index: 2;
+}
+@keyframes flap-fold-top {
+  from { transform: rotateX(0deg); }
+  to { transform: rotateX(-90deg); }
+}
+@keyframes flap-fold-bottom {
+  0%, 50% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0deg); }
+}
+
 @keyframes kenburns {
   from { transform: scale(1.18) translate(2%, 1%); }
   to { transform: scale(1.05) translate(0, 0); }
