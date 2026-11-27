@@ -279,8 +279,8 @@ export function RoomClient(props: Props) {
           </p>
           {!kickedMe && (
             <>
-              <form action={joinRoom.bind(null, room.id, "pros")}><button className="btn btn-ink">{topic.pros_label}로 참여</button></form>
-              <form action={joinRoom.bind(null, room.id, "cons")}><button className="btn">{topic.cons_label}로 참여</button></form>
+              <form action={joinRoom.bind(null, room.id, "pros")}><button className="btn btn-ink" aria-label={`${topic.pros_label} 진영으로 참여`}>{topic.pros_label}</button></form>
+              <form action={joinRoom.bind(null, room.id, "cons")}><button className="btn" aria-label={`${topic.cons_label} 진영으로 참여`}>{topic.cons_label}</button></form>
             </>
           )}
         </div>

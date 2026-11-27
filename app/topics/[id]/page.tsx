@@ -168,10 +168,10 @@ async function Topic({ params }: { params: Promise<{ id: string }> }) {
                       ) : (
                         <div className="flex gap-2">
                           <form action={joinRoom.bind(null, r.id, "pros")}>
-                            <button className="btn btn-ink">{topic.pros_label}로 입장</button>
+                            <button className="btn btn-ink" aria-label={`${topic.pros_label} 진영으로 입장`}>{topic.pros_label}</button>
                           </form>
                           <form action={joinRoom.bind(null, r.id, "cons")}>
-                            <button className="btn">{topic.cons_label}로 입장</button>
+                            <button className="btn" aria-label={`${topic.cons_label} 진영으로 입장`}>{topic.cons_label}</button>
                           </form>
                         </div>
                       )}
