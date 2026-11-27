@@ -1,26 +1,129 @@
 @import "tailwindcss";
 
+/* 6 : 3 : 1 — linen chalk : matte black : siren red. corner blue 는 PROS 진영 표시에만 쓴다. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --linen: #ece5d6;
+  --linen-deep: #ddd3bf;
+  --linen-dim: #c9bea8;
+  --ink: #18181a;
+  --ink-soft: #4a4844;
+  --siren: #f2301f;
+  --corner-blue: #2747d8;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-linen: var(--linen);
+  --color-linen-deep: var(--linen-deep);
+  --color-linen-dim: var(--linen-dim);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-siren: var(--siren);
+  --color-pros: var(--corner-blue);
+  --color-cons: var(--siren);
+  --font-display: var(--font-black-han), "Black Han Sans", sans-serif;
+  --font-sans: var(--font-plex-kr), "IBM Plex Sans KR", system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--linen);
+  color: var(--ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--linen);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+/* 리넨 종이 질감: 아주 옅은 노이즈 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.09 0 0 0 0 0.09 0 0 0 0 0.1 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+:focus-visible {
+  outline: 3px solid var(--siren);
+  outline-offset: 2px;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+}
+
+@layer components {
+/* 포스터 버튼: 눌리면 그림자가 사라지며 내려앉는다 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  font-weight: 700;
+  background: var(--linen);
+  color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: transform 0.08s, box-shadow 0.08s;
+  cursor: pointer;
+}
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--ink);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-ink {
+  background: var(--ink);
+  color: var(--linen);
+  box-shadow: 3px 3px 0 var(--siren);
+}
+.btn-siren {
+  background: var(--siren);
+  color: var(--linen);
+  border-color: var(--ink);
+}
+.btn-pros {
+  background: var(--corner-blue);
+  color: var(--linen);
+}
+
+.field {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.875rem;
+  border: 2px solid var(--ink);
+  border-radius: 0.5rem;
+  background: #f6f1e7;
+  color: var(--ink);
+}
+.field::placeholder {
+  color: var(--ink-soft);
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
