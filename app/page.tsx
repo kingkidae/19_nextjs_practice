@@ -4,7 +4,6 @@ import { HeroCoin } from "@/components/HeroCoin";
 import { TopicCard } from "@/components/TopicCard";
 import { JsonLd } from "@/components/JsonLd";
 import { Marquee, Reveal, Stagger, Tilt } from "@/components/motion";
-import { SplitFlap } from "@/components/SplitFlap";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORIES } from "@/lib/constants";
 import type { TopicCard as T } from "@/lib/types";
@@ -51,8 +50,12 @@ export default function Home() {
 
       <section className="mx-auto grid max-w-7xl items-center gap-6 px-4 pb-10 pt-10 sm:px-6 lg:grid-cols-[1.25fr_1fr] lg:pt-16">
         <div>
-          <h1 className="font-display text-[clamp(3.5rem,11vw,9.5rem)]">
-            <SplitFlap lines={["THE", "CONTRO", "VERSIAL"]} />
+          <h1 className="glitch-host font-display text-[clamp(3.5rem,11vw,9.5rem)]">
+            <span aria-hidden>
+              {["THE", "CONTRO", "VERSIAL"].map((line) => (
+                <span key={line} className="glitch" data-text={line}>{line}</span>
+              ))}
+            </span>
             <span className="sr-only">
               The Controversial: 찬반 실시간 토론 커뮤니티
             </span>

@@ -123,54 +123,66 @@ body::before {
 }
 }
 
-/* 스플릿 플랩: 글자 한 칸 = 위아래 반쪽 판 + 가운데 경첩선 */
-.flap {
-  /* 경첩 위치: Black Han Sans 는 글자가 줄 위쪽에 붙어 있어 글자 중심이 줄 높이의 42% 지점이다 */
-  --split: 42%;
+/* 글리치: 평소엔 또렷하다가 주기적으로 찢어진다. 빨간 잔상(::before) + 반대로 밀리는 조각(::after) */
+.glitch {
   position: relative;
-  display: inline-block;
-  perspective: 1.6em;
+  display: block;
 }
-.flap-sizer {
-  visibility: hidden; /* 칸 폭을 최종 글자에 고정한다 */
-}
-.flap-layer {
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
   position: absolute;
   inset: 0;
-  text-align: center;
-  backface-visibility: hidden;
-  transform-origin: 50% var(--split);
+  pointer-events: none;
+  animation-duration: 3.2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: steps(1, end);
+  animation-delay: -2.4s; /* 로드 직후 한 번 바로 튄다 */
 }
-.flap-top {
-  clip-path: inset(-0.2em -0.2em calc(100% - var(--split)) -0.2em);
+.glitch::before {
+  color: var(--siren);
+  animation-name: glitch-a;
 }
-.flap-bottom {
-  clip-path: inset(var(--split) -0.2em -0.2em -0.2em);
+.glitch::after {
+  color: var(--ink);
+  background: var(--linen); /* 원래 글자의 같은 줄을 가리고 밀린 조각만 보이게 */
+  animation-name: glitch-b;
 }
-.flap-fold-top {
-  animation: flap-fold-top var(--d) ease-in forwards;
+.glitch:nth-child(2)::before,
+.glitch:nth-child(2)::after {
+  animation-delay: -2.25s;
 }
-.flap-fold-bottom {
-  animation: flap-fold-bottom var(--d) ease-out forwards;
+.glitch:nth-child(3)::before,
+.glitch:nth-child(3)::after {
+  animation-delay: -2.1s;
 }
-.flap::after {
-  content: "";
-  position: absolute;
-  left: -0.02em;
-  right: -0.02em;
-  top: var(--split);
-  height: 0.025em;
-  transform: translateY(-50%);
-  background: var(--linen);
-  z-index: 2;
+.glitch-host:hover .glitch::before,
+.glitch-host:hover .glitch::after {
+  animation-duration: 0.9s;
 }
-@keyframes flap-fold-top {
-  from { transform: rotateX(0deg); }
-  to { transform: rotateX(-90deg); }
+@keyframes glitch-a {
+  0%, 86%, 100% { clip-path: inset(100% 0 0 0); transform: none; }
+  87% { clip-path: inset(8% 0 72% 0); transform: translateX(-0.05em); }
+  89% { clip-path: inset(52% 0 22% 0); transform: translateX(0.06em); }
+  91% { clip-path: inset(28% 0 50% 0); transform: translateX(-0.03em); }
+  93% { clip-path: inset(74% 0 6% 0); transform: translateX(0.05em); }
+  95% { clip-path: inset(0 0 84% 0); transform: translateX(-0.06em); }
+  97% { clip-path: inset(40% 0 38% 0); transform: translateX(0.02em); }
 }
-@keyframes flap-fold-bottom {
-  0%, 50% { transform: rotateX(90deg); }
-  100% { transform: rotateX(0deg); }
+@keyframes glitch-b {
+  0%, 86%, 100% { clip-path: inset(100% 0 0 0); transform: none; }
+  88% { clip-path: inset(62% 0 18% 0); transform: translateX(0.07em); }
+  90% { clip-path: inset(14% 0 66% 0); transform: translateX(-0.05em); }
+  92% { clip-path: inset(44% 0 34% 0); transform: translateX(0.04em); }
+  94% { clip-path: inset(80% 0 4% 0); transform: translateX(-0.07em); }
+  96% { clip-path: inset(22% 0 60% 0); transform: translateX(0.03em); }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* 전역 규칙이 지속시간만 줄이면 무한 반복이 빠르게 깜빡이므로 효과 자체를 끈다 */
+  .glitch::before,
+  .glitch::after {
+    display: none;
+  }
 }
 
 @keyframes kenburns {
