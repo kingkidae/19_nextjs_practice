@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "공지 | The Controversial" };
+export const metadata = { title: "공지", description: "The Controversial 운영 공지와 업데이트 소식.", alternates: { canonical: "/notices" } };
 
 export default function NoticesPage() {
   return (

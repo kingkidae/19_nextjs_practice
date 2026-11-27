@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/auth";
 import { TopicForm } from "./TopicForm";
 
-export const metadata = { title: "주제 올리기 | The Controversial" };
+export const metadata = { title: "주제 올리기", robots: { index: false, follow: true } };
 
 export default function NewTopicPage({ searchParams }: PageProps<"/topics/new">) {
   return (

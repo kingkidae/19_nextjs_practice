@@ -228,16 +228,16 @@ export function RoomClient(props: Props) {
               {interrupting ? (
                 <>
                   <p className="font-display text-3xl text-siren">잠깐!!! {nameOf(room.interrupter_id)}</p>
-                  <p className="font-display text-7xl tabular-nums">{clock(remaining)}</p>
+                  <p className={`font-display text-7xl tabular-nums ${remaining > 0 && remaining < 10_000 ? "clock-hurry" : ""}`}>{clock(remaining)}</p>
                   <p className="text-sm text-linen/70">{nameOf(room.speaker_id)} 님의 남은 {clock(pausedLeft)} 은 멈춰 있습니다.</p>
                 </>
               ) : (
                 <>
                   <p className="font-display text-3xl">
-                    <span className={room.current_side === "pros" ? "text-[#9fb1ff]" : "text-[#ff8a7d]"}>{label(room.current_side)}</span>{" "}
+                    <SideChip side={room.current_side} label={label(room.current_side)} />{" "}
                     {nameOf(room.speaker_id)}
                   </p>
-                  <p className="font-display text-7xl tabular-nums">{beforeFirstTurn ? "--:--" : clock(remaining)}</p>
+                  <p className={`font-display text-7xl tabular-nums ${!beforeFirstTurn && remaining > 0 && remaining < 10_000 ? "clock-hurry" : ""}`}>{beforeFirstTurn ? "--:--" : clock(remaining)}</p>
                   <p className="text-sm text-linen/70">발언자 외에는 전체 채팅에 쓸 수 없습니다.</p>
                 </>
               )}
@@ -256,7 +256,7 @@ export function RoomClient(props: Props) {
                       const { error } = await supabase.from("votes").insert({ room_id: room.id, side: s });
                       if (error) setError(error.code === "23505" ? "이미 투표했습니다." : error.message);
                     }}
-                    className={`btn ${s === "pros" ? "btn-pros" : "btn-siren"}`}
+                    className={`btn ${s === "pros" ? "" : "btn-ghost"}`}
                     aria-pressed={myVote === s}
                   >
                     {label(s)} {voteCount(s)}표
@@ -279,8 +279,8 @@ export function RoomClient(props: Props) {
           </p>
           {!kickedMe && (
             <>
-              <form action={joinRoom.bind(null, room.id, "pros")}><button className="btn btn-pros">{topic.pros_label}로 참여</button></form>
-              <form action={joinRoom.bind(null, room.id, "cons")}><button className="btn btn-siren">{topic.cons_label}로 참여</button></form>
+              <form action={joinRoom.bind(null, room.id, "pros")}><button className="btn btn-ink">{topic.pros_label}로 참여</button></form>
+              <form action={joinRoom.bind(null, room.id, "cons")}><button className="btn">{topic.cons_label}로 참여</button></form>
             </>
           )}
         </div>
@@ -337,9 +337,9 @@ export function RoomClient(props: Props) {
         </section>
 
         {/* ── 팀 채팅과 팀원 ── */}
-        <section aria-labelledby="team-chat" className={`flex min-h-[28rem] flex-col overflow-hidden rounded-2xl border-2 border-t-8 border-ink bg-ink text-linen ${me ? (me.side === "pros" ? "border-t-pros" : "border-t-cons") : ""}`}>
+        <section aria-labelledby="team-chat" className="flex min-h-[28rem] flex-col overflow-hidden rounded-2xl border-2 border-ink bg-ink text-linen">
           <h2 id="team-chat" className="border-b border-linen/20 px-4 py-2 font-bold">
-            {me ? `팀 채팅 (${label(me.side)})` : "팀원"}
+            {me ? <>팀 채팅 <SideChip side={me.side} label={label(me.side)} /></> : "팀원"}
           </h2>
           <TeamRoster
             sides={viewer?.isAdmin || !me ? ["pros", "cons"] : [me.side]}
@@ -382,7 +382,7 @@ export function RoomClient(props: Props) {
             <Coin mode="roulette" result={room.first_side} onDone={() => setRouletteDoneFor(room.turn_starts_at)} className="h-[min(60vh,28rem)] w-[min(90vw,28rem)]" />
             <p className="font-display h-16 text-5xl" aria-live="assertive">
               {rouletteDone && (
-                <motion.span initial={{ scale: 2.2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className={room.first_side === "pros" ? "text-[#9fb1ff]" : "text-siren"}>
+                <motion.span initial={{ scale: 2.2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-linen">
                   {label(room.first_side)} 선공!
                 </motion.span>
               )}
@@ -416,14 +416,27 @@ export function RoomClient(props: Props) {
   );
 }
 
+// 어두운 바탕 기준: PROS 는 칠한 칩, CONS 는 테두리 칩
+function SideChip({ side, label, large }: { side: Side | null; label: string; large?: boolean }) {
+  if (!side) return null;
+  const size = large ? "px-4 py-1" : "px-2.5 py-0.5";
+  return side === "pros" ? (
+    <span className={`inline-block rounded-full bg-linen text-ink ${size}`}>{label}</span>
+  ) : (
+    <span className={`inline-block rounded-full border-2 border-linen ${size}`}>{label}</span>
+  );
+}
+
 function Corner({ side, label, count, lit }: { side: Side; label: string; count: number; lit: boolean }) {
   return (
     <div
       className={`flex items-center justify-between gap-3 px-6 py-5 transition-colors duration-500 md:flex-col md:justify-center ${
-        lit ? (side === "pros" ? "bg-pros" : "bg-cons") : ""
+        lit ? "bg-siren" : ""
       }`}
     >
-      <p className="font-display text-3xl">{label}</p>
+      <p className="font-display text-3xl">
+        <SideChip side={side} label={label} large />
+      </p>
       <p className="text-sm">{count}명{lit && " · 발언 중"}</p>
     </div>
   );
@@ -450,11 +463,23 @@ function ChatLog({
       {messages.length === 0 && <p className={dark ? "text-linen/70" : "text-ink-soft"}>아직 조용합니다.</p>}
       {messages.map((m) =>
         m.channel === "system" ? (
-          <p key={m.id} className={`text-center text-xs font-bold ${dark ? "text-linen/70" : "text-ink-soft"}`}>{m.body}</p>
+          <motion.p key={m.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className={`text-center text-xs font-bold ${dark ? "text-linen/70" : "text-ink-soft"}`}>{m.body}</motion.p>
         ) : (
-          <div key={m.id} className={`group flex gap-2 ${m.user_id === mine ? "flex-row-reverse text-right" : ""}`}>
+          <motion.div
+            key={m.id}
+            initial={{ opacity: 0, y: 12, x: m.user_id === mine ? 16 : -16 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            transition={{ type: "spring", stiffness: 420, damping: 30 }}
+            className={`group flex gap-2 ${m.user_id === mine ? "flex-row-reverse text-right" : ""}`}
+          >
             <div className="max-w-[80%]">
-              <p className={`text-xs font-bold ${dark ? "text-linen/80" : sideOf?.(m.user_id) === "pros" ? "text-pros" : sideOf?.(m.user_id) === "cons" ? "text-cons" : ""}`}>
+              <p className={`flex items-center gap-1 text-xs font-bold ${m.user_id === mine ? "justify-end" : ""} ${dark ? "text-linen/80" : ""}`}>
+                {!dark && sideOf?.(m.user_id) && (
+                  <span
+                    aria-label={sideOf(m.user_id) === "pros" ? "PROS" : "CONS"}
+                    className={`inline-block h-2.5 w-2.5 rounded-sm border-[1.5px] border-ink ${sideOf(m.user_id) === "pros" ? "bg-ink" : ""}`}
+                  />
+                )}
                 {nameOf(m.user_id)}
               </p>
               <p className={`inline-block whitespace-pre-wrap break-words rounded-xl px-3 py-1.5 text-left ${dark ? "bg-linen/10" : m.user_id === mine ? "bg-ink text-linen" : "bg-linen-deep"}`}>
@@ -470,7 +495,7 @@ function ChatLog({
                 삭제
               </button>
             )}
-          </div>
+          </motion.div>
         ),
       )}
       <div ref={end} />

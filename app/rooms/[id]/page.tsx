@@ -4,6 +4,9 @@ import { getViewer } from "@/lib/auth";
 import type { Member, Message, Room } from "@/lib/types";
 import { RoomClient } from "./RoomClient";
 
+// 토론방은 금방 끝나는 실시간 공간이라 검색 결과에 넣지 않는다. 주제 페이지가 대표 페이지다.
+export const metadata = { title: "토론방", robots: { index: false, follow: true } };
+
 export default function RoomPage({ params, searchParams }: PageProps<"/rooms/[id]">) {
   return (
     <Suspense fallback={<div className="mx-auto h-[70vh] max-w-7xl animate-pulse bg-linen-deep" />}>

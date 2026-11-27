@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isCategory } from "@/lib/constants";
 
@@ -44,6 +45,7 @@ export async function createTopic(_: FormState, form: FormData): Promise<FormSta
     .select("id")
     .single();
   if (error) return { error: `주제를 올리지 못했습니다: ${error.message}` };
+  revalidateTag("sitemap", "max"); // sitemap.xml·llms.txt 에 새 주제 반영
   redirect(`/topics/${data.id}`);
 }
 

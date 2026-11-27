@@ -310,12 +310,12 @@ begin
 
   v_first := case when random() < 0.5 then 'pros' else 'cons' end;
   v_speaker := _pick_speaker(p_room, v_first);
-  -- 첫 발언은 룰렛 연출(7초)이 끝난 뒤 시작한다
+  -- 첫 발언은 룰렛 연출(회전 2초 + 결과 2초)이 끝난 뒤 시작한다
   update rooms
   set status = 'live', started_at = now(), first_side = v_first, current_round = 1, current_side = v_first,
       speaker_id = v_speaker,
-      turn_starts_at = now() + interval '7 seconds',
-      turn_ends_at = now() + interval '7 seconds' + make_interval(secs => speak_seconds),
+      turn_starts_at = now() + interval '4 seconds',
+      turn_ends_at = now() + interval '4 seconds' + make_interval(secs => speak_seconds),
       wait_used = false, block_used = false
   where id = p_room;
   perform _sys(p_room, format('룰렛 결과 %s 선공. 첫 발언자: %s', _side_name(v_first), _nick(v_speaker)));
@@ -527,6 +527,8 @@ grant execute on function public.join_room, public.start_debate, public.tick_roo
   public.use_wait, public.use_block, public.end_interrupt, public.kick_member,
   public.admin_set_muted, public.admin_set_role, public.create_order
   to authenticated;
+
+-- 테이블 접근 권한은 grants.sql 에 있다. 이 파일 다음에 실행한다.
 
 -- ───────────────────────── realtime ─────────────────────────
 alter publication supabase_realtime add table public.rooms, public.room_members, public.messages, public.votes;

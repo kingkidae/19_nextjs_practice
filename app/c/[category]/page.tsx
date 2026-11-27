@@ -1,12 +1,29 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
+import { JsonLd } from "@/components/JsonLd";
+import { getSettings } from "@/lib/settings";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FilterPanel } from "@/components/FilterPanel";
 import { TopicCard } from "@/components/TopicCard";
+import { RiseLines, Stagger, Tilt } from "@/components/motion";
 import { CardsSkeleton, SetupNotice } from "@/components/Feedback";
 import { createClient } from "@/lib/supabase/server";
 import { categoryName, isCategory } from "@/lib/constants";
 import type { TopicCard as T } from "@/lib/types";
+
+export async function generateMetadata({ params }: PageProps<"/c/[category]">): Promise<Metadata> {
+  const { category } = await params;
+  if (!isCategory(category)) return { title: "없는 카테고리", robots: { index: false } };
+  const name = categoryName(category);
+  const description = `${name} 분야의 논쟁 주제를 찬성과 반대로 나눠 실시간으로 토론합니다. 가벼운 주제부터 무거운 주제까지 경중으로 골라 보세요.`;
+  return {
+    title: `${name} 찬반 토론`,
+    description,
+    alternates: { canonical: `/c/${category}` },
+    openGraph: { title: `${name} 찬반 토론`, description, url: `/c/${category}` },
+  };
+}
 
 export default function CategoryPage({ params, searchParams }: PageProps<"/c/[category]">) {
   return (
@@ -29,9 +46,27 @@ export default function CategoryPage({ params, searchParams }: PageProps<"/c/[ca
 async function Heading({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
   if (!isCategory(category)) notFound();
+  const { site_url } = await getSettings();
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
-      <h1 className="font-display text-6xl sm:text-7xl">{categoryName(category)}</h1>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: `${categoryName(category)} 찬반 토론`,
+          url: `${site_url}/c/${category}`,
+          inLanguage: "ko-KR",
+          isPartOf: { "@id": `${site_url}/#site` },
+          breadcrumb: {
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "홈", item: `${site_url}/` },
+              { "@type": "ListItem", position: 2, name: categoryName(category), item: `${site_url}/c/${category}` },
+            ],
+          },
+        }}
+      />
+      <h1 className="font-display text-6xl sm:text-8xl"><RiseLines lines={[categoryName(category)]} /></h1>
       <Link href={`/topics/new?category=${category}`} className="btn btn-siren">이 카테고리에 주제 올리기</Link>
     </div>
   );
@@ -94,9 +129,13 @@ async function Results({
   return (
     <>
       <p className="mt-8 text-sm text-ink-soft">{topics.length}개 주제</p>
-      <div className="mt-3 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {topics.map((t) => <TopicCard key={t.id} topic={t} />)}
-      </div>
+      <Stagger className="mt-3 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {topics.map((t) => (
+          <Tilt key={t.id}>
+            <TopicCard topic={t} />
+          </Tilt>
+        ))}
+      </Stagger>
     </>
   );
 }

@@ -1,10 +1,12 @@
 "use server";
 
 import ExcelJS from "exceljs";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/auth";
 import { parseBigKinds, type StatKind } from "@/lib/bigkinds";
+import { SETTING_FIELDS } from "@/lib/settings";
+import { safeNext } from "@/lib/safe-next";
 
 async function requireAdmin() {
   const viewer = await getViewer();
@@ -16,6 +18,7 @@ async function requireAdmin() {
 export async function deleteTopic(id: string) {
   const { supabase } = await getViewer();
   await supabase.from("topics").delete().eq("id", id);
+  revalidateTag("sitemap", "max");
   redirect("/");
 }
 
@@ -118,4 +121,30 @@ export async function uploadStats(_: UploadState, form: FormData): Promise<Uploa
   if (error) return { error: error.message };
   revalidatePath(`/topics/${topicId}`);
   return { message: `${KIND_LABEL[kind]} ${parsed.length}건을 저장했습니다.` };
+}
+
+export type SettingsState = { error?: string; ok?: boolean };
+
+// 링크는 사이트 안 경로(/...), http(s) 주소, 빈 값만 받는다. javascript: 같은 주소를 막는다.
+const okLink = (v: string) => v === "" || safeNext(v) === v || /^https?:\/\/[^\s\\]+$/i.test(v);
+
+export async function saveSettings(_: SettingsState, form: FormData): Promise<SettingsState> {
+  const supabase = await requireAdmin();
+  const rows = [];
+  for (const f of SETTING_FIELDS) {
+    const value = String(form.get(f.key) ?? "").trim();
+    if (value.length > 500) return { error: `${f.label}: 500자 이내로 적어 주세요.` };
+    if (f.key === "contact_email") {
+      if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return { error: "문의 메일 형식을 확인해 주세요." };
+    } else if (f.key === "site_url") {
+      if (!/^https?:\/\/[^\s/]+/i.test(value)) return { error: "사이트 주소는 http:// 또는 https:// 로 시작해야 합니다." };
+    } else if (!okLink(value)) {
+      return { error: `${f.label}: /로 시작하는 경로나 http(s) 주소만 쓸 수 있습니다.` };
+    }
+    rows.push({ key: f.key, value, updated_at: new Date().toISOString() });
+  }
+  const { error } = await supabase.from("site_settings").upsert(rows);
+  if (error) return { error: error.message };
+  updateTag("settings");
+  return { ok: true };
 }

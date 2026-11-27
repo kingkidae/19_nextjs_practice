@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getViewer } from "@/lib/auth";
 import { ShopClient } from "./ShopClient";
 
-export const metadata = { title: "상점 | The Controversial" };
+export const metadata = { title: "아이템 상점", description: "토론 아이템 잠깐!!! 과 방.해.금.지 를 살 수 있습니다.", robots: { index: false, follow: true } };
 
 export default function ShopPage() {
   return (

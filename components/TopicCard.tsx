@@ -6,7 +6,7 @@ import type { TopicCard as T } from "@/lib/types";
 function PosterCover({ topic }: { topic: T }) {
   const heavy = topic.weight >= 7;
   return (
-    <div className={`absolute inset-0 overflow-hidden ${heavy ? "bg-ink" : "bg-linen-deep"}`} aria-hidden>
+    <div className={`poster-img absolute inset-0 overflow-hidden ${heavy ? "bg-ink" : "bg-linen-deep"}`} aria-hidden>
       <span
         className={`font-display absolute -bottom-6 -left-2 whitespace-nowrap text-[7.5rem] leading-none ${heavy ? "text-linen/10" : "text-ink/10"}`}
       >
@@ -26,11 +26,11 @@ export function TopicCard({ topic }: { topic: T }) {
   const prosPct = total ? Math.round((topic.pros_count / total) * 100) : 50;
 
   return (
-    <article className="relative flex aspect-[4/5] flex-col overflow-hidden rounded-xl border-2 border-ink bg-[#f6f1e7]">
+    <article className="poster-card relative flex aspect-[4/5] flex-col overflow-hidden rounded-xl border-2 border-ink bg-[#f6f1e7]">
       <div className="relative h-1/2 w-full shrink-0">
         {topic.image_url ? (
           // eslint-disable-next-line @next/next/no-img-element -- 사용자가 올린 Supabase Storage 이미지
-          <img src={topic.image_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <img src={topic.image_url} alt="" className="poster-img absolute inset-0 h-full w-full object-cover" />
         ) : (
           <PosterCover topic={topic} />
         )}
@@ -49,9 +49,9 @@ export function TopicCard({ topic }: { topic: T }) {
           </h3>
           <p className="mt-2 flex items-center justify-between text-sm text-linen/85">
             <span>
-              <span className="font-bold text-[#9fb1ff]">{topic.pros_label} {topic.pros_count}명</span>
+              <span className="rounded-full bg-linen px-2 py-0.5 font-bold text-ink">{topic.pros_label} {topic.pros_count}</span>
               <span className="mx-1.5 text-linen/50">대</span>
-              <span className="font-bold text-[#ff8a7d]">{topic.cons_label} {topic.cons_count}명</span>
+              <span className="rounded-full border border-linen px-2 py-[1px] font-bold">{topic.cons_label} {topic.cons_count}</span>
             </span>
             <span>{timeAgo(topic.last_chat_at)}</span>
           </p>
@@ -60,9 +60,8 @@ export function TopicCard({ topic }: { topic: T }) {
 
       <div className="flex flex-1 flex-col gap-3 p-4">
         {/* 줄다리기 막대: 찬반 비율 */}
-        <div className="flex h-2 overflow-hidden rounded-full bg-linen-dim" aria-label={`${topic.pros_label} ${prosPct}%`}>
-          <div className="bg-pros" style={{ width: `${prosPct}%` }} />
-          <div className="flex-1 bg-cons" />
+        <div className="flex h-2.5 overflow-hidden rounded-full border-[1.5px] border-ink" aria-label={`${topic.pros_label} ${prosPct}%`}>
+          <div className="bg-ink" style={{ width: `${prosPct}%` }} />
         </div>
         <p className="line-clamp-2 text-sm text-ink-soft">{topic.description}</p>
         <div className="mt-auto flex items-center justify-between text-xs">

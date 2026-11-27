@@ -18,7 +18,13 @@
 ### 1. Supabase 프로젝트
 
 1. supabase.com 에서 새 프로젝트를 만든다.
-2. SQL Editor 에서 `supabase/schema.sql` 전체를 실행한 뒤 `supabase/seed.sql` 을 실행한다(시연용 주제 14개와 예시 통계).
+2. SQL Editor 에서 아래 순서로 실행한다.
+   1. `supabase/schema.sql` (테이블, 토론 엔진)
+   2. `supabase/grants.sql` (테이블 접근 권한)
+   3. `supabase/patch-02-profile-settings.sql` (프로필·개인정보·사이트 설정)
+   4. `supabase/seed.sql` (시연용 주제 14개와 예시 통계)
+
+   `patch-01-roulette-4s.sql` 은 이미 schema.sql 에 반영돼 있어서, 이전 버전 DB 를 쓰던 경우에만 실행한다.
 3. Project Settings > API Keys 에서 URL, Publishable key, Secret key 를 복사한다.
 
 ### 2. 환경 변수
@@ -43,7 +49,11 @@ where id = (select id from auth.users where email = '내 이메일');
 
 이후 다른 회원의 등급은 관리자 페이지 > 회원 에서 바꿀 수 있다.
 
-### 5. 실행
+### 5. 사이트 설정
+
+관리자 페이지 > 사이트 설정에서 배포 주소(site_url), 이용약관·개인정보 처리방침 링크, 문의 메일, SNS 주소를 정한다. site_url 은 sitemap.xml, robots.txt, 검색엔진 대표 주소, 공유 이미지에 쓰인다.
+
+### 6. 실행
 
 ```bash
 npm install
@@ -66,4 +76,5 @@ app/                  페이지 (rooms/[id]/RoomClient.tsx 가 실시간 토론�
 components/           Coin(three.js), TopicCard, FilterPanel, StatsBento
 lib/                  Supabase 클라이언트, 상수, 빅카인즈 파서
 proxy.ts              세션 쿠키 갱신 (Next.js 16 의 middleware)
+app/sitemap.ts, robots.ts, llms.txt, opengraph-image   검색엔진·AI 검색(GEO)용
 ```

@@ -37,11 +37,11 @@ export function RoomForm({ topicId, prosLabel, consLabel }: { topicId: string; p
       <fieldset>
         <legend className="mb-1 font-bold">내 진영</legend>
         <div className="grid grid-cols-2 gap-2">
-          <label className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-linen/30 p-2 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-siren has-[:checked]:border-pros has-[:checked]:bg-pros">
+          <label className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-linen/30 p-2 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-siren has-[:checked]:border-linen has-[:checked]:bg-linen has-[:checked]:font-bold has-[:checked]:text-ink">
             <input type="radio" name="side" value="pros" required className="sr-only" />
             {prosLabel}
           </label>
-          <label className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-linen/30 p-2 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-linen has-[:checked]:border-siren has-[:checked]:bg-siren">
+          <label className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-linen/30 p-2 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-siren has-[:checked]:border-linen has-[:checked]:font-bold has-[:checked]:ring-2 has-[:checked]:ring-linen">
             <input type="radio" name="side" value="cons" className="sr-only" />
             {consLabel}
           </label>

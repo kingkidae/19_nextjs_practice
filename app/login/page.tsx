@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { AuthForm } from "./AuthForm";
 
-export const metadata = { title: "로그인 | The Controversial" };
+export const metadata = { title: "로그인", robots: { index: false, follow: true } };
 
 export default function LoginPage() {
   return (

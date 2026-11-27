@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getViewer } from "@/lib/auth";
@@ -9,6 +10,29 @@ import { joinRoom } from "../actions";
 import { RoomForm } from "./RoomForm";
 import { StatusBadge } from "@/components/StatusBadge";
 import { deleteTopic } from "@/app/admin/actions";
+import { JsonLd } from "@/components/JsonLd";
+import { CountUp, Reveal, RiseLines } from "@/components/motion";
+import { createPublicClient } from "@/lib/supabase/public";
+import { getSettings, SITE } from "@/lib/settings";
+
+export async function generateMetadata({ params }: PageProps<"/topics/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const { data: t } = await createPublicClient()
+    .from("topics")
+    .select("title, description, category, pros_label, cons_label, image_url")
+    .eq("id", id)
+    .maybeSingle();
+  if (!t) return { title: "찾을 수 없는 주제", robots: { index: false } };
+  const description = (t.description || `${t.title}: ${t.pros_label} vs ${t.cons_label}. ${categoryName(t.category)} 찬반 토론.`).slice(0, 155);
+  return {
+    title: `${t.title} 찬반 토론`,
+    description,
+    keywords: [t.title, `${t.pros_label} ${t.cons_label}`, `${categoryName(t.category)} 토론`, "찬반 토론"],
+    alternates: { canonical: `/topics/${id}` },
+    openGraph: { type: "article", title: `${t.title} | ${t.pros_label} vs ${t.cons_label}`, description, url: `/topics/${id}`, siteName: SITE.fullName, locale: "ko_KR" },
+    twitter: { card: "summary_large_image", title: t.title, description },
+  };
+}
 
 export default function TopicPage({ params }: PageProps<"/topics/[id]">) {
   return (
@@ -32,19 +56,54 @@ async function Topic({ params }: { params: Promise<{ id: string }> }) {
   const count = (status: Room["status"]) => list.filter((r) => r.status === status).length;
   const canDelete = profile?.role === "admin" || (user && topic.created_by === user.id);
 
+  const { site_url } = await getSettings();
+  const url = `${site_url}/topics/${topic.id}`;
+
   return (
     <article>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "DiscussionForumPosting",
+              "@id": url,
+              headline: topic.title,
+              text: topic.description || `${topic.pros_label} vs ${topic.cons_label}`,
+              url,
+              datePublished: topic.created_at,
+              ...(topic.last_chat_at && { dateModified: topic.last_chat_at }),
+              inLanguage: "ko-KR",
+              articleSection: categoryName(topic.category),
+              ...(topic.image_url && { image: topic.image_url }),
+              author: { "@type": "Person", name: "The Controversial 회원" },
+              interactionStatistic: [
+                { "@type": "InteractionCounter", interactionType: "https://schema.org/JoinAction", userInteractionCount: topic.pros_count + topic.cons_count },
+              ],
+              isPartOf: { "@id": `${site_url}/#site` },
+            },
+            {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "홈", item: `${site_url}/` },
+                { "@type": "ListItem", position: 2, name: categoryName(topic.category), item: `${site_url}/c/${topic.category}` },
+                { "@type": "ListItem", position: 3, name: topic.title, item: url },
+              ],
+            },
+          ],
+        }}
+      />
       <header className="relative overflow-hidden bg-ink text-linen">
         {topic.image_url && (
           // eslint-disable-next-line @next/next/no-img-element -- 사용자가 올린 Storage 이미지
-          <img src={topic.image_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" />
+          <img src={topic.image_url} alt="" className="absolute inset-0 h-full w-full scale-105 object-cover opacity-35 animate-[kenburns_18s_ease-out_forwards] motion-reduce:animate-none" />
         )}
         <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-12 sm:px-6">
           <p className="text-sm text-linen/70">
             <Link href={`/c/${topic.category}`} className="underline underline-offset-4">{categoryName(topic.category)}</Link>
             {" "}/ 경중 {topic.weight} {weightLabel(topic.weight)} / 마지막 채팅 {timeAgo(topic.last_chat_at)}
           </p>
-          <h1 className="font-display mt-4 max-w-4xl text-5xl sm:text-7xl">{topic.title}</h1>
+          <h1 className="font-display mt-4 max-w-4xl text-5xl sm:text-7xl"><RiseLines lines={[topic.title]} delay={0.05} /></h1>
           {topic.description && <p className="mt-5 max-w-2xl text-linen/85">{topic.description}</p>}
           {canDelete && (
             <form action={deleteTopic.bind(null, topic.id)} className="mt-6">
@@ -55,17 +114,18 @@ async function Topic({ params }: { params: Promise<{ id: string }> }) {
         {/* 두 코너: 진영 선택 */}
         <div className="relative grid sm:grid-cols-2">
           {(["pros", "cons"] as const).map((side) => (
+            <Reveal key={side} x={side === "pros" ? -60 : 60} y={0} delay={0.2}>
             <a
-              key={side}
               href="#rooms"
-              className={`group flex items-center justify-between px-6 py-6 sm:px-10 ${side === "pros" ? "bg-pros" : "bg-cons sm:flex-row-reverse sm:text-right"}`}
+              className={`flex h-full items-center justify-between px-6 py-6 sm:px-10 ${side === "pros" ? "border-t border-linen/20 bg-ink text-linen" : "border-y-2 border-ink bg-linen text-ink sm:flex-row-reverse sm:text-right"}`}
             >
               <span>
-                <span className="block text-sm text-linen/80">{side === "pros" ? "블루 코너" : "레드 코너"}</span>
+                <span className="block text-sm opacity-70">{side === "pros" ? "PROS" : "CONS"}</span>
                 <span className="font-display text-4xl">{side === "pros" ? topic.pros_label : topic.cons_label}</span>
               </span>
-              <span className="font-display text-5xl">{side === "pros" ? topic.pros_count : topic.cons_count}<span className="ml-1 text-lg">명</span></span>
+              <span className="font-display text-5xl"><CountUp to={side === "pros" ? topic.pros_count : topic.cons_count} /><span className="ml-1 text-lg">명</span></span>
             </a>
+            </Reveal>
           ))}
         </div>
       </header>
@@ -108,10 +168,10 @@ async function Topic({ params }: { params: Promise<{ id: string }> }) {
                       ) : (
                         <div className="flex gap-2">
                           <form action={joinRoom.bind(null, r.id, "pros")}>
-                            <button className="btn btn-pros">{topic.pros_label}로 입장</button>
+                            <button className="btn btn-ink">{topic.pros_label}로 입장</button>
                           </form>
                           <form action={joinRoom.bind(null, r.id, "cons")}>
-                            <button className="btn btn-siren">{topic.cons_label}로 입장</button>
+                            <button className="btn">{topic.cons_label}로 입장</button>
                           </form>
                         </div>
                       )}

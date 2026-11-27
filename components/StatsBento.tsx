@@ -70,10 +70,15 @@ export function StatsBento(props: Props) {
         </p>
       </div>
       <div className="mt-5 grid auto-rows-[minmax(10rem,auto)] gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((c) => (
+        {cards.map((c, i) => (
           <motion.button
             layoutId={`bento-${c.key}`}
             key={c.key}
+            initial={{ opacity: 0, y: 36, scale: 0.96 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            whileHover={{ y: -6, boxShadow: "8px 10px 0 #18181a" }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
             type="button"
             onClick={() => setOpen(c.key)}
             className={`flex flex-col overflow-hidden rounded-2xl border-2 border-ink bg-[#f6f1e7] p-4 text-left ${c.className}`}
@@ -179,12 +184,11 @@ function Standoff({ prosLabel, consLabel, prosCount, consCount, rooms, full }: P
   return (
     <div>
       <div className="flex items-end justify-between">
-        <p><span className="font-display text-5xl text-pros">{prosCount}</span> <span className="text-sm">{prosLabel}</span></p>
-        <p className="text-right"><span className="text-sm">{consLabel}</span> <span className="font-display text-5xl text-cons">{consCount}</span></p>
+        <p><span className="font-display text-5xl">{prosCount}</span> <span className="text-sm">{prosLabel}</span></p>
+        <p className="text-right"><span className="text-sm">{consLabel}</span> <span className="font-display text-5xl text-transparent [-webkit-text-stroke:1.5px_var(--ink)]">{consCount}</span></p>
       </div>
-      <div className="mt-3 flex h-3 gap-[2px] overflow-hidden rounded-full" aria-label={`${prosLabel} ${pct}%, ${consLabel} ${100 - pct}%`}>
-        <div className="rounded-l-full bg-pros" style={{ width: `${pct}%` }} />
-        <div className="flex-1 rounded-r-full bg-cons" />
+      <div className="mt-3 flex h-3 overflow-hidden rounded-full border-2 border-ink" aria-label={`${prosLabel} ${pct}%, ${consLabel} ${100 - pct}%`}>
+        <div className="bg-ink" style={{ width: `${pct}%` }} />
       </div>
       <p className="mt-3 text-sm text-ink-soft">
         진행 중 {rooms.live}방 / 대기 {rooms.waiting}방 / 종료 {rooms.ended}방

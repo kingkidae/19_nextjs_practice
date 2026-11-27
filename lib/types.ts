@@ -74,4 +74,14 @@ export interface Profile {
   nickname: string;
   avatar_url: string | null;
   role: "user" | "admin";
+  bio?: string;
+  onboarded?: boolean;
+}
+
+export interface ProfilePrivate {
+  user_id: string;
+  birth_year: number | null;
+  gender: "female" | "male" | "other" | "private" | null;
+  region: string | null;
+  interests: string[];
 }

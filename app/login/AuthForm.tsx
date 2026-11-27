@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { safeNext } from "@/lib/safe-next";
 
 export function AuthForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const rawNext = params.get("next") ?? "/";
-  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+  const next = safeNext(params.get("next"));
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [error, setError] = useState(params.get("error") ? "로그인에 실패했습니다. 다시 시도하세요." : "");
   const [notice, setNotice] = useState("");
@@ -24,13 +24,18 @@ export function AuthForm() {
     setError("");
     setNotice("");
 
+    // 첫 로그인이면 프로필부터 채우게 한다
+    const go = async (userId: string) => {
+      const { data: profile } = await supabase.from("profiles").select("onboarded").eq("id", userId).single();
+      router.replace(profile && !profile.onboarded ? `/profile?welcome=1&next=${encodeURIComponent(next)}` : next);
+      router.refresh();
+    };
+
     if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       setBusy(false);
       if (error) return setError("이메일 또는 비밀번호가 맞지 않습니다.");
-      router.replace(next);
-      router.refresh();
-      return;
+      return go(data.user.id);
     }
 
     const nickname = String(form.get("nickname")).trim();
@@ -41,9 +46,8 @@ export function AuthForm() {
     });
     setBusy(false);
     if (error) return setError(error.message.includes("registered") ? "이미 가입된 이메일입니다." : error.message);
-    if (data.session) {
-      router.replace(next);
-      router.refresh();
+    if (data.session && data.user) {
+      go(data.user.id);
     } else {
       setNotice("확인 메일을 보냈습니다. 메일의 링크를 누르면 가입이 끝납니다.");
     }

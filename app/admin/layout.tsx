@@ -2,12 +2,16 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/auth";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "관리자", robots: { index: false, follow: false } };
 
 const TABS = [
   { href: "/admin", label: "토론방·주제" },
   { href: "/admin/notices", label: "공지" },
   { href: "/admin/users", label: "회원" },
   { href: "/admin/stats", label: "빅카인즈 자료" },
+  { href: "/admin/settings", label: "사이트 설정" },
 ];
 
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
