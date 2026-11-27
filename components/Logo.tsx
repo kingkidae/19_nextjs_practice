@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
+import { LogoMark } from "@/components/LogoMark";
 
 // CONTROVERSIAL 속에 숨은 V 와 S = VS. 로드 때 떨어져 박히고, 로고에 마우스를 올리면 서로 들이받는다.
 function Hit({ ch, i, dir, hit }: { ch: string; i: number; dir: 1 | -1; hit: number }) {
@@ -34,9 +35,19 @@ export function Logo() {
       href="/"
       onPointerEnter={() => setHit((n) => n + 1)}
       onFocus={() => setHit((n) => n + 1)}
-      className="font-display whitespace-nowrap text-lg leading-none sm:text-2xl"
+      className="font-display flex items-center gap-2 whitespace-nowrap text-lg leading-none sm:text-2xl"
       aria-label="The Controversial 홈"
     >
+      {/* 마크: 로드 때 굴러 들어오고, 마우스를 올리면 동전처럼 한 바퀴 뒤집힌다 */}
+      <motion.span
+        className="inline-flex"
+        initial={{ rotate: -180, scale: 0.4, opacity: 0 }}
+        animate={{ rotate: 0, scale: 1, opacity: 1, rotateY: hit * 360 }}
+        transition={{ rotate: { type: "spring", stiffness: 260, damping: 18 }, scale: { type: "spring", stiffness: 260, damping: 18 }, rotateY: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } }}
+        style={{ transformPerspective: 400 }}
+      >
+        <LogoMark size={30} />
+      </motion.span>
       <span aria-hidden>
         THE CONTRO<Hit ch="V" i={0} dir={1} hit={hit} />ER<Hit ch="S" i={1} dir={-1} hit={hit} />IAL
       </span>

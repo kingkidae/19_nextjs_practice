@@ -1,6 +1,7 @@
 "use client";
 
 import { MotionConfig, motion, useScroll, useSpring } from "motion/react";
+import { BackToTop } from "@/components/BackToTop";
 
 // 모든 모션은 사용자의 '동작 줄이기' 설정을 따른다
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -8,6 +9,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <MotionConfig reducedMotion="user">
       <ScrollProgress />
       {children}
+      <BackToTop />
     </MotionConfig>
   );
 }

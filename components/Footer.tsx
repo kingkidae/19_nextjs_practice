@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Settings } from "@/lib/settings";
 import { SITE } from "@/lib/settings";
 import { CATEGORIES } from "@/lib/constants";
+import { LogoMark } from "@/components/LogoMark";
 
 // 관리자 > 사이트 설정의 링크를 쓴다. 외부 주소는 새 탭으로 연다.
 function FooterLink({ href, children, strong }: { href: string; children: React.ReactNode; strong?: boolean }) {
@@ -26,7 +27,7 @@ export function Footer({ settings }: { settings: Settings }) {
       <div className="mx-auto max-w-7xl px-4 pt-12 sm:px-6">
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
-            <p className="font-display text-3xl text-linen">THE CONTROVERSIAL</p>
+            <p className="font-display flex items-center gap-3 text-3xl text-linen"><LogoMark size={40} />THE CONTROVERSIAL</p>
             <p className="mt-3 max-w-sm text-sm">{SITE.description}</p>
           </div>
           <nav aria-label="카테고리 바로가기">

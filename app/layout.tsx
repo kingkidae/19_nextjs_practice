@@ -41,7 +41,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           data={{
             "@context": "https://schema.org",
             "@graph": [
-              { "@type": "Organization", "@id": `${settings.site_url}/#org`, name: SITE.fullName, url: settings.site_url, ...(settings.contact_email && { email: settings.contact_email }), sameAs: [settings.instagram_url, settings.x_url, settings.youtube_url].filter(Boolean) },
+              { "@type": "Organization", "@id": `${settings.site_url}/#org`, name: SITE.fullName, url: settings.site_url, logo: `${settings.site_url}/icon.svg`, ...(settings.contact_email && { email: settings.contact_email }), sameAs: [settings.instagram_url, settings.x_url, settings.youtube_url].filter(Boolean) },
               { "@type": "WebSite", "@id": `${settings.site_url}/#site`, name: SITE.fullName, url: settings.site_url, inLanguage: "ko-KR", description: SITE.description, publisher: { "@id": `${settings.site_url}/#org` } },
             ],
           }}

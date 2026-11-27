@@ -22,7 +22,8 @@
    1. `supabase/schema.sql` (테이블, 토론 엔진)
    2. `supabase/grants.sql` (테이블 접근 권한)
    3. `supabase/patch-02-profile-settings.sql` (프로필·개인정보·사이트 설정)
-   4. `supabase/seed.sql` (시연용 주제 14개와 예시 통계)
+   4. `supabase/patch-03-bundle-order.sql` (잠깐!!!·방.해.금.지 묶음 구매)
+   5. `supabase/seed.sql` (시연용 주제 14개와 예시 통계)
 
    `patch-01-roulette-4s.sql` 은 이미 schema.sql 에 반영돼 있어서, 이전 버전 DB 를 쓰던 경우에만 실행한다.
 3. Project Settings > API Keys 에서 URL, Publishable key, Secret key 를 복사한다.

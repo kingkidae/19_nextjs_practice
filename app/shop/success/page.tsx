@@ -25,7 +25,13 @@ async function Confirm({ searchParams }: { searchParams: Promise<Record<string, 
   // 내 주문인지, 금액이 바뀌지 않았는지 확인한다 (RLS 로 내 주문만 보인다)
   const { data: order } = await supabase.from("payments").select("*").eq("order_id", orderId).maybeSingle();
   if (!order) return <Result ok={false} message="주문을 찾지 못했습니다." />;
-  if (order.status === "done") return <Result ok message={`${ITEMS[order.item as "wait"].name} ${order.qty}개가 이미 지급되었습니다.`} />;
+  // 묶음 주문(wait_qty/block_qty)과 예전 한 종류 주문(item/qty)을 모두 읽는다
+  const counts = {
+    wait: order.wait_qty ?? (order.item === "wait" ? order.qty : 0),
+    block: order.block_qty ?? (order.item === "block" ? order.qty : 0),
+  };
+  const summary = (["wait", "block"] as const).filter((k) => counts[k] > 0).map((k) => `${ITEMS[k].name} ${counts[k]}개`).join(", ");
+  if (order.status === "done") return <Result ok message={`${summary}가 이미 지급되었습니다.`} />;
   if (order.amount !== amount) return <Result ok={false} message="결제 금액이 주문 금액과 달라 승인하지 않았습니다." />;
 
   const secret = process.env.TOSS_SECRET_KEY ?? "";
@@ -48,7 +54,7 @@ async function Confirm({ searchParams }: { searchParams: Promise<Record<string, 
 
   const { error } = await createAdminClient().rpc("complete_order", { p_order: orderId, p_payment_key: paymentKey });
   if (error) return <Result ok={false} message={`결제는 승인됐지만 아이템 지급에 실패했습니다. 관리자에게 주문번호 ${orderId} 를 알려 주세요.`} />;
-  return <Result ok message={`${ITEMS[order.item as "wait"].name} ${order.qty}개를 받았습니다.`} />;
+  return <Result ok message={`${summary}를 받았습니다.`} />;
 }
 
 function Result({ ok, message }: { ok: boolean; message: string }) {
